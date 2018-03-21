@@ -1,2 +1,5 @@
 secrets.yml
 coverage.out
+
+vendor
+Gopkg.*
