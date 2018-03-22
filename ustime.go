@@ -39,6 +39,10 @@ func IsUSDateTime(str string) bool {
 		return false
 	}
 	s := strings.SplitN(str, " ", 2)
+	if len(s) == 1 && IsUSDate(s[0]) {
+		return true
+	}
+
 	if len(s) < 2 || !IsUSDate(s[0]) {
 		return false
 	}
@@ -58,7 +62,7 @@ const (
 )
 
 var (
-	usDateTimeFormats = []string{USDateTimeFormat}
+	usDateTimeFormats = []string{FullUSDateFormat, USDateTimeFormat}
 	rxUSDateTime      = regexp.MustCompile(USDateTimePattern)
 	// USMarshalFormat sets the time resolution format used for marshaling time (set to milliseconds)
 	USMarshalFormat = USDateTimeFormat
