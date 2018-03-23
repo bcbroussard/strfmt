@@ -18,13 +18,21 @@ func init() {
 
 // IsUSDate returns true when the string is a valid date
 func IsUSDate(str string) bool {
-	_, err := time.Parse(FullUSDateFormat, str)
-	return err == nil
+	if str == "0000-00-00" || str == "00/00/0000" {
+		return true
+	}
+	if _, err := time.Parse(FullUSDateFormat, str); err != nil {
+		if _, err := time.Parse(AltUSDateFormat, str); err != nil {
+			return false
+		}
+	}
+	return true
 }
 
 const (
 	// FullUSDateFormat represents a full-date
 	FullUSDateFormat = "01/02/2006"
+	AltUSDateFormat  = "2006-01-02"
 )
 
 // USDate represents a date from the API
@@ -42,9 +50,18 @@ func (d *USDate) UnmarshalText(text []byte) error {
 	if len(text) == 0 {
 		return nil
 	}
-	dd, err := time.Parse(FullUSDateFormat, string(text))
+	sDate := string(text)
+	if sDate == "0000-00-00" || sDate == "00/00/0000" {
+		return nil
+	}
+
+	dd, err := time.Parse(FullUSDateFormat, sDate)
 	if err != nil {
-		return err
+		ad, aErr := time.Parse(AltUSDateFormat, sDate)
+		if aErr != nil {
+			return aErr
+		}
+		dd = ad
 	}
 	*d = USDate(dd)
 	return nil
@@ -109,10 +126,18 @@ func (d *USDate) UnmarshalJSON(data []byte) error {
 // UnmarshalEasyJSON sets the USDate from a easyjson.Lexer
 func (d *USDate) UnmarshalEasyJSON(in *jlexer.Lexer) {
 	if data := in.String(); in.Ok() {
+		if data == "0000-00-00" {
+			return
+		}
+
 		tt, err := time.Parse(FullUSDateFormat, data)
 		if err != nil {
-			in.AddError(err)
-			return
+			ad, aErr := time.Parse(AltUSDateFormat, data)
+			if aErr != nil {
+				in.AddError(aErr)
+				return
+			}
+			tt = ad
 		}
 		*d = USDate(tt)
 	}

@@ -56,13 +56,14 @@ func IsUSDateTime(str string) bool {
 
 const (
 	USDateTimeFormat     = "01/02/2006 03:04pm"
+	AltUSDateTimeFormat  = "2006-01-02 15:04:05"
 	USDateTimeFormatZone = "01/02/2006 03:04pm MST"
 	// USDateTimePattern pattern to match for the date-time format
-	USDateTimePattern = `^((0[0-9]|1[0-2]):([0-5][0-9])(am|pm)( [A-Z]{3})?)$`
+	USDateTimePattern = `^((0[0-9]|1[0-2]):([0-5][0-9])(am|pm)( [A-Z]{3})?)|(((?:0[0-9]|1[0-2])|(?:1[0-9])):([0-5][0-9]):([0-5][0-9])?)$`
 )
 
 var (
-	usDateTimeFormats = []string{FullUSDateFormat, USDateTimeFormat}
+	usDateTimeFormats = []string{USDateTimeFormat, AltUSDateTimeFormat, FullUSDateFormat, AltUSDateFormat}
 	rxUSDateTime      = regexp.MustCompile(USDateTimePattern)
 	// USMarshalFormat sets the time resolution format used for marshaling time (set to milliseconds)
 	USMarshalFormat = USDateTimeFormat
@@ -70,7 +71,7 @@ var (
 
 // ParseUSDateTime parses a string that represents an US Formatted PST
 func ParseUSDateTime(data string) (USDateTime, error) {
-	if data == "" {
+	if data == "" || data == "0000-00-00 00:00:00" || data == "0000-00-00" {
 		return NewUSDateTime(), nil
 	}
 	pst, err := time.LoadLocation("America/Los_Angeles")
