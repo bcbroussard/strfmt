@@ -38,6 +38,10 @@ type BoolString struct {
 
 // IsBoolString returns true when the string is a valid date
 func IsBoolString(str string) bool {
+	if str == "" {
+		return true
+	}
+
 	_, err := strconv.ParseBool(str)
 	return err == nil
 }

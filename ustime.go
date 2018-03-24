@@ -35,6 +35,9 @@ func init() {
 
 // IsUSDateTime returns true when the string is a valid date-time
 func IsUSDateTime(str string) bool {
+	if str == "" {
+		return true
+	}
 	if len(str) < 4 {
 		return false
 	}
