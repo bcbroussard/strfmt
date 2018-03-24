@@ -108,11 +108,11 @@ func NewUSDateTime() USDateTime {
 
 // String converts this time to a string
 func (t USDateTime) String() string {
-	return time.Time(t).Format(USMarshalFormat)
-}
-
-func (t USDateTime) StringWithZone() string {
-	return time.Time(t).Format(USMarshalFormat)
+	tt := time.Time(t)
+	if tt.IsZero() || tt.Unix() == 0 {
+		return ""
+	}
+	return tt.Format(USMarshalFormat)
 }
 
 // MarshalText implements the text marshaller interface
@@ -158,7 +158,11 @@ func (t *USDateTime) Scan(raw interface{}) error {
 
 // Value converts USDateTime to a primitive value ready to written to a database.
 func (t USDateTime) Value() (driver.Value, error) {
-	return driver.Value(time.Time(t).Format(RFC3339Millis)), nil
+	tt := time.Time(t)
+	if tt.IsZero() || tt.Unix() == 0 {
+		return nil, nil
+	}
+	return tt, nil
 }
 
 // MarshalJSON returns the USDateTime as JSON
@@ -170,7 +174,12 @@ func (t USDateTime) MarshalJSON() ([]byte, error) {
 
 // MarshalEasyJSON writes the USDateTime to a easyjson.Writer
 func (t USDateTime) MarshalEasyJSON(w *jwriter.Writer) {
-	w.String(time.Time(t).Format(USMarshalFormat))
+	s := t.String()
+	if s == "" {
+		w.RawString("null")
+	} else {
+		w.String(s)
+	}
 }
 
 // UnmarshalJSON sets the USDateTime from JSON
